@@ -91,6 +91,7 @@ class Game {
     ticked() {
         if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
             this.resetSeed();
+            this.snake.eatSeed();
         }
     }
     
@@ -137,6 +138,7 @@ class Snake extends Element {
     constructor() {
         super(10, 10);
         this.direction = DIRECTION.RIGHT;
+        this.body = new Array();
     }
     
     moveUp() {
@@ -171,7 +173,51 @@ class Snake extends Element {
         this.direction = DIRECTION.LEFT;
     }
     
+    moveBody() {
+        if (this.body.length > 0) {
+            console.log("Moving body.");
+            let i;
+            for(i = this.body.length-1; i > 0; --i) {
+                this.body[i].x = this.body[i-1].x;
+                this.body[i].y = this.body[i-1].y;
+            }
+            
+            this.body[0].x = this.x;
+            this.body[0].y = this.y;
+        }
+    }
+    
+    eatSeed() {
+        let newElement = new Element(this.x, this.y);
+        
+        // Given the direction, shift the newElement's position.
+        // E.g. if the snake goes up, it comes from the bottom. Then spawn
+        // The new element towards the bottom.
+        
+        
+        switch(this.direction) {
+            case DIRECTION.UP:
+                ++newElement.y;
+                break;
+            case DIRECTION.RIGHT:
+                --newElement.x;
+                break;
+            case DIRECTION.DOWN:
+                --newElement.y;
+                break;
+            case DIRECTION.LEFT:
+                ++newElement.x;
+                break;
+        }
+        
+        this.body.push(newElement);
+        console.log(this.body);
+    }
+    
     tick() {
+        
+        this.moveBody();
+
         switch(this.direction) {
         case DIRECTION.UP:
             this.moveUp();
@@ -188,11 +234,24 @@ class Snake extends Element {
         }
     }
     
+    drawElement(context, element) {
+        context.rect(element.x * 5, element.y * 5, 5, 5);
+    }
+    
     draw(context) {
         // Draw the head
         context.beginPath();
-        context.rect(this.x * 5, this.y * 5, 5, 5);
         context.fillStyle = "red";
+        
+        // Draw the head
+        this.drawElement(context, this);
+        
+        // Draw the body
+        let that = this;
+        this.body.forEach(function(element) {
+            that.drawElement(context, element);
+        });
+
         context.fill();
     }
 }
