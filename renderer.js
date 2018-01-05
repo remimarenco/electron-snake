@@ -11,18 +11,66 @@ const DIRECTION = {
 }
 
 class Game {
-    constructor(context) {
+    constructor(context, snake) {
         this.elements = new Array();
         this.context = context;
+        this.snake = snake;
+        
+        this.seed = new Seed(0, 0);
+        
+        // Add the snake after the seed.
+        this.addElement(this.seed);
+        this.addElement(this.snake);
+
     }
     
+    pickRandomSeedCoordinates() {
+        return [Math.floor(Math.random()*64), Math.floor(Math.random()*48)];
+    }
+    
+    resetSeed() {
+        let seedCoordinates;
+        do {
+            seedCoordinates = this.pickRandomSeedCoordinates();
+        } while(seedCoordinates[0] == this.snake.x &&
+                seedCoordinates[1] == this.snake.y);
+        this.seed.x = seedCoordinates[0];
+        this.seed.y = seedCoordinates[1];
+        console.log("New seed at ("+ this.seed.x + ", " + this.seed.y + ")");
+    }
+    
+    handleKeyPress(keyName) {
+        switch(keyName) {
+        case "ArrowUp":
+        case "z":
+            this.snake.goUp();
+            break;
+        case "ArrowRight":
+        case "d":
+            this.snake.goRight();
+            break;
+        case "ArrowDown":
+        case "s":
+            this.snake.goDown();
+            break;
+        case "ArrowLeft":
+        case "q":
+            this.snake.goLeft();
+            break;
+        }
+    }
+
     addElement(element) {
         this.elements.push(element);
     }
     
+    
     run() {
+        // Set new seed coordinates.
+        this.resetSeed();
+
         var that = this;
-        setInterval(function() { that.tick(); }, 500);
+        setInterval(function() { that.tick(); }, 100);
     }
     
     clearScreen() {
@@ -35,25 +83,30 @@ class Game {
     tickElement() {
         var that = this;
         return function(element) {
-            console.log("tick ");
-            console.log(element);
             element.tick();
             element.draw(that.context);
         }
     }
     
+    ticked() {
+        if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
+            this.resetSeed();
+        }
+    }
+    
     tick() {
-        console.log("Tick!");
         this.clearScreen()
         this.elements.forEach(this.tickElement());
+        
+        this.ticked();
     }
 }
 
 class Element {
 
-    constructor() {
-        this.x = 10;
-        this.y = 10;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
     tick() {
@@ -65,10 +118,24 @@ class Element {
     }
 }
 
+class Seed extends Element {
+    constructor(x, y) {
+        super(x, y);
+    }
+
+    draw(context) {
+        // Draw the head
+        context.beginPath();
+        context.rect(this.x * 5, this.y * 5, 5, 5);
+        context.fillStyle = "blue";
+        context.fill();
+    }
+}
+
 class Snake extends Element {
 
     constructor() {
-        super();
+        super(10, 10);
         this.direction = DIRECTION.RIGHT;
     }
     
@@ -88,10 +155,26 @@ class Snake extends Element {
         --this.x;
     }
     
+    goUp() {
+        this.direction = DIRECTION.UP;
+    }
+    
+    goRight() {
+        this.direction = DIRECTION.RIGHT;
+    }
+    
+    goDown() {
+        this.direction = DIRECTION.DOWN;
+    }
+    
+    goLeft() {
+        this.direction = DIRECTION.LEFT;
+    }
+    
     tick() {
         switch(this.direction) {
         case DIRECTION.UP:
-            this.moveLeft();
+            this.moveUp();
             break;
         case DIRECTION.RIGHT:
             this.moveRight();
@@ -118,6 +201,11 @@ let canvas = document.getElementById("game");
 let context = canvas.getContext("2d");
 
 let snake = new Snake();
-let game = new Game(context);
-game.addElement(snake);
+let game = new Game(context, snake);
+
+document.addEventListener('keydown', (event) => {
+    const keyName = event.key;
+    game.handleKeyPress(keyName);
+});
+
 game.run();
