@@ -14,6 +14,93 @@ const SCALE = 30;
 const WIDTH = 30;
 const HEIGHT = 30;
 
+
+class GameState {
+
+    constructor(game) {
+        this.game = game;
+    }
+
+    handleKeyPress(keyName) {
+
+    }
+
+    tick() {
+
+    }
+
+    resume() {
+
+    }
+}
+
+class RunningState extends GameState {
+
+    constructor(game) {
+        super(game);
+    }
+
+    handleKeyPress(keyName) {
+        switch(keyName) {
+        case "ArrowUp":
+        case "z":
+            this.game.snake.goUp();
+            break;
+        case "ArrowRight":
+        case "d":
+            this.game.snake.goRight();
+            break;
+        case "ArrowDown":
+        case "s":
+            this.game.snake.goDown();
+            break;
+        case "ArrowLeft":
+        case "q":
+            this.game.snake.goLeft();
+            break;
+        case " ":
+            this.game.changeState(new PauseState(this.game));
+            break;
+        }
+    }
+
+    tick() {
+        console.log("tick");
+        this.game.elements.forEach((element) => {
+            element.tick();
+        });
+        this.game.ticked();
+    }
+
+    resume() {
+        this.game.resumeDrawer();
+        this.game.resumeTicker();
+    }
+
+}
+
+class PauseState extends GameState {
+    constructor(game) {
+        super(game);
+    }
+
+    handleKeyPress(keyName) {
+        switch(keyName) {
+        case " ":
+            this.game.changeState(new RunningState(this.game));
+            break;
+        }
+    }
+
+    resume() {
+        this.game.stopTicker();
+        this.game.stopDrawer();
+        alert("Pause.");
+        this.handleKeyPress(" ");
+    }
+
+}
+
 class Game {
     constructor(context, snake, width, height) {
         this.elements = new Array();
@@ -26,6 +113,14 @@ class Game {
         this.addElement(this.seed);
         this.addElement(this.snake);
 
+        this.ticker = null;
+        this.drawer = null;
+
+    }
+
+    changeState(state) {
+        this.state = state;
+        this.state.resume();
     }
     
     pickRandomSeedCoordinates() {
@@ -56,37 +151,34 @@ class Game {
     }
     
     handleKeyPress(keyName) {
-        switch(keyName) {
-        case "ArrowUp":
-        case "z":
-            this.snake.goUp();
-            break;
-        case "ArrowRight":
-        case "d":
-            this.snake.goRight();
-            break;
-        case "ArrowDown":
-        case "s":
-            this.snake.goDown();
-            break;
-        case "ArrowLeft":
-        case "q":
-            this.snake.goLeft();
-            break;
-        }
+        this.state.handleKeyPress(keyName);
     }
 
     addElement(element) {
         this.elements.push(element);
     }
     
+
+    resumeTicker() {
+        this.ticker = setInterval(() => { this.tick(); }, 100);
+    }
+
+    resumeDrawer() {
+        this.drawer = setInterval(() => { this.draw(); }, 16);
+    }
+
+    stopTicker() {
+        clearInterval(this.ticker);
+    }
+
+    stopDrawer() {
+        clearInterval(this.drawer);
+    }
     
     run() {
         // Set new seed coordinates.
         this.resetSeed();
-
-        setInterval(() => { this.tick(); }, 100);
-        setInterval(() => { this.draw(); }, 16);
+        this.changeState(new RunningState(this));
     }
     
     clearScreen() {
@@ -103,11 +195,6 @@ class Game {
         });
     }
     
-    tickElement() {
-        return (element) => {
-            element.tick();
-        }
-    }
     
     ticked() {
         if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
@@ -117,9 +204,7 @@ class Game {
     }
     
     tick() {
-        this.elements.forEach(this.tickElement());
-        
-        this.ticked();
+        this.state.tick();
     }
 }
 
@@ -163,18 +248,30 @@ class Snake extends Element {
     
     moveUp() {
         --this.y;
+        if(this.y < 0) {
+            this.y = HEIGHT - 1;
+        }
     }
     
     moveRight() {
         ++this.x;
+        if(this.x == WIDTH) {
+            this.x = 0;
+        }
     }
     
     moveDown() {
         ++this.y;
+        if(this.y == HEIGHT) {
+            this.y = 0;
+        }
     }
     
     moveLeft() {
         --this.x;
+        if(this.x < 0) {
+            this.x = HEIGHT - 1;
+        }
     }
     
     goUp() {
@@ -195,7 +292,6 @@ class Snake extends Element {
     
     moveBody() {
         if (this.body.length > 0) {
-            console.log("Moving body.");
             let i;
             for(i = this.body.length-1; i > 0; --i) {
                 this.body[i].x = this.body[i-1].x;
@@ -267,9 +363,8 @@ class Snake extends Element {
         this.drawElement(context, this);
         
         // Draw the body
-        let that = this;
-        this.body.forEach(function(element) {
-            that.drawElement(context, element);
+        this.body.forEach((element) => {
+            this.drawElement(context, element);
         });
 
         context.fill();
