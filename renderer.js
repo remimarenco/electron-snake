@@ -69,8 +69,7 @@ class Game {
         // Set new seed coordinates.
         this.resetSeed();
 
-        var that = this;
-        setInterval(function() { that.tick(); }, 100);
+        setInterval(() => { this.tick(); }, 100);
     }
     
     clearScreen() {
@@ -82,9 +81,9 @@ class Game {
     
     tickElement() {
         var that = this;
-        return function(element) {
+        return (element) => {
             element.tick();
-            element.draw(that.context);
+            element.draw(this.context);
         }
     }
     
