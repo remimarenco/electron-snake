@@ -21,6 +21,10 @@ class GameState {
         this.game = game;
     }
 
+    draw() {
+
+    }
+
     handleKeyPress(keyName) {
 
     }
@@ -77,6 +81,12 @@ class RunningState extends GameState {
         this.game.resumeTicker();
     }
 
+    draw() {
+        this.game.clearScreen();
+        this.game.elements.forEach((element) => {
+            element.draw(this.game.context);
+        });
+    }
 }
 
 class PauseState extends GameState {
@@ -95,8 +105,23 @@ class PauseState extends GameState {
     resume() {
         this.game.stopTicker();
         this.game.stopDrawer();
-        alert("Pause.");
-        this.handleKeyPress(" ");
+
+        this.draw();
+    }
+
+    tick() {
+
+    }
+
+    draw() {
+        let ctx = this.game.context;
+        ctx.textAlign = "center";
+        ctx.fillStyle = "black";
+        ctx.font = "50px Arial";
+        ctx.fillText("PAUSE",
+                     (WIDTH*SCALE)/2,
+                     (HEIGHT*SCALE)/2);
+        console.log("Drawn");
     }
 
 }
@@ -161,10 +186,12 @@ class Game {
 
     resumeTicker() {
         this.ticker = setInterval(() => { this.tick(); }, 100);
+        this.tick();
     }
 
     resumeDrawer() {
         this.drawer = setInterval(() => { this.draw(); }, 16);
+        this.draw();
     }
 
     stopTicker() {
@@ -189,10 +216,7 @@ class Game {
     }
 
     draw() {
-        this.clearScreen();
-        this.elements.forEach((element) => {
-            element.draw(this.context);
-        });
+        this.state.draw();
     }
     
     
