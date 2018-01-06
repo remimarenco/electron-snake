@@ -86,6 +86,7 @@ class Game {
         this.resetSeed();
 
         setInterval(() => { this.tick(); }, 100);
+        setInterval(() => { this.draw(); }, 16);
     }
     
     clearScreen() {
@@ -94,11 +95,17 @@ class Game {
         this.context.fillStyle = "white";
         this.context.fill();
     }
+
+    draw() {
+        this.clearScreen();
+        this.elements.forEach((element) => {
+            element.draw(this.context);
+        });
+    }
     
     tickElement() {
         return (element) => {
             element.tick();
-            element.draw(this.context);
         }
     }
     
@@ -110,7 +117,6 @@ class Game {
     }
     
     tick() {
-        this.clearScreen()
         this.elements.forEach(this.tickElement());
         
         this.ticked();
