@@ -149,7 +149,10 @@ class GameOverState extends GameState {
         ctx.font = "50px Arial";
         ctx.fillText("GAME OVER",
                      (WIDTH*SCALE)/2,
-                     (HEIGHT*SCALE)/2);
+                     ((HEIGHT*SCALE)/2)-25);
+        ctx.fillText("SCORE = " + this.game.score,
+                     (WIDTH*SCALE)/2,
+                     ((WIDTH*SCALE)/2)+25);
     }
 }
 
@@ -158,6 +161,7 @@ class Game {
         this.elements = new Array();
         this.context = context;
         this.snake = snake;
+        this.score = 0;
         
         this.seed = new Seed(0, 0);
         
@@ -255,7 +259,6 @@ class Game {
             if(body[i].x == this.snake.x &&
                body[i].y == this.snake.y)
             {
-                console.log("Collide.");
                 return true;
             }
         }
@@ -265,6 +268,7 @@ class Game {
     
     ticked() {
         if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
+            ++this.score;
             this.resetSeed();
             this.snake.eatSeed();
         }
