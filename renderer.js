@@ -80,7 +80,6 @@ class Game {
     }
     
     tickElement() {
-        var that = this;
         return (element) => {
             element.tick();
             element.draw(this.context);
