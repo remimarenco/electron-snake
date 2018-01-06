@@ -34,14 +34,25 @@ class Game {
     }
     
     resetSeed() {
-        let seedCoordinates;
+        let coords;
         do {
-            seedCoordinates = this.pickRandomSeedCoordinates();
-        } while(seedCoordinates[0] == this.snake.x &&
-                seedCoordinates[1] == this.snake.y);
-        this.seed.x = seedCoordinates[0];
-        this.seed.y = seedCoordinates[1];
+            coords = this.pickRandomSeedCoordinates();
+            console.log(coords);
+        } while(this.seedCollide(coords[0], coords[1]));
+        this.seed.x = coords[0];
+        this.seed.y = coords[1];
         console.log("New seed at ("+ this.seed.x + ", " + this.seed.y + ")");
+    }
+
+    seedCollide(x, y) {
+        let i;
+        let elts = this.snake.body
+        for(i = 0; i < elts.length; i++) {
+            if (elts[i].x == x && elts[i].y == y) {
+                return true;
+            }
+        }
+        return false;
     }
     
     handleKeyPress(keyName) {
