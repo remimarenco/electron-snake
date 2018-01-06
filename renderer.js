@@ -10,8 +10,12 @@ const DIRECTION = {
     LEFT: 3,
 }
 
+const SCALE = 30;
+const WIDTH = 30;
+const HEIGHT = 30;
+
 class Game {
-    constructor(context, snake) {
+    constructor(context, snake, width, height) {
         this.elements = new Array();
         this.context = context;
         this.snake = snake;
@@ -25,7 +29,8 @@ class Game {
     }
     
     pickRandomSeedCoordinates() {
-        return [Math.floor(Math.random()*64), Math.floor(Math.random()*48)];
+        return [Math.floor(Math.random()*WIDTH),
+                Math.floor(Math.random()*HEIGHT)];
     }
     
     resetSeed() {
@@ -74,7 +79,7 @@ class Game {
     
     clearScreen() {
         this.context.beginPath();
-        this.context.rect(0, 0, 320, 240);
+        this.context.rect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
         this.context.fillStyle = "white";
         this.context.fill();
     }
@@ -125,7 +130,7 @@ class Seed extends Element {
     draw(context) {
         // Draw the head
         context.beginPath();
-        context.rect(this.x * 5, this.y * 5, 5, 5);
+        context.rect(this.x * SCALE, this.y * SCALE, SCALE, SCALE);
         context.fillStyle = "blue";
         context.fill();
     }
@@ -233,7 +238,7 @@ class Snake extends Element {
     }
     
     drawElement(context, element) {
-        context.rect(element.x * 5, element.y * 5, 5, 5);
+        context.rect(element.x * SCALE, element.y * SCALE, SCALE, SCALE);
     }
     
     draw(context) {
@@ -255,6 +260,8 @@ class Snake extends Element {
 }
 
 let canvas = document.getElementById("game");
+canvas.width = SCALE * WIDTH;
+canvas.height = SCALE * HEIGHT;
 let context = canvas.getContext("2d");
 
 let snake = new Snake();
