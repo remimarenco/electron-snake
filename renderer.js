@@ -126,6 +126,33 @@ class PauseState extends GameState {
 
 }
 
+class GameOverState extends GameState {
+    constructor(game) {
+        super(game);
+    }
+
+    resume() {
+        this.game.stopTicker();
+        this.game.stopTicker();
+
+        this.draw();
+    }
+
+    tick() {
+
+    }
+
+    draw() {
+        let ctx = this.game.context;
+        ctx.textAlign = "center";
+        ctx.fillStyle = "black";
+        ctx.font = "50px Arial";
+        ctx.fillText("GAME OVER",
+                     (WIDTH*SCALE)/2,
+                     (HEIGHT*SCALE)/2);
+    }
+}
+
 class Game {
     constructor(context, snake, width, height) {
         this.elements = new Array();
@@ -218,12 +245,31 @@ class Game {
     draw() {
         this.state.draw();
     }
+
+
+    hasCollidedOneself() {
+        let i;
+        let body = this.snake.body;
+        console.log("Check colliding");
+        for(i = 0; i < body.length; i++) {
+            if(body[i].x == this.snake.x &&
+               body[i].y == this.snake.y)
+            {
+                console.log("Collide.");
+                return true;
+            }
+        }
+        return false;
+    }
     
     
     ticked() {
         if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
             this.resetSeed();
             this.snake.eatSeed();
+        }
+        else if (this.hasCollidedOneself()) {
+            this.changeState(new GameOverState(this));
         }
     }
     
