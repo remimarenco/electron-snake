@@ -318,6 +318,8 @@ class Snake extends Element {
         super(10, 10);
         this.direction = DIRECTION.RIGHT;
         this.body = new Array();
+        this.body.push(new Element(9, 10));
+        this.body.push(new Element(8, 10));
     }
     
     moveUp() {
