@@ -45,26 +45,26 @@ class RunningState extends GameState {
     }
 
     handleKeyPress(keyName) {
-        switch(keyName) {
-        case "ArrowUp":
-        case "z":
-            this.game.snake.goUp();
-            break;
-        case "ArrowRight":
-        case "d":
-            this.game.snake.goRight();
-            break;
-        case "ArrowDown":
-        case "s":
-            this.game.snake.goDown();
-            break;
-        case "ArrowLeft":
-        case "q":
-            this.game.snake.goLeft();
-            break;
-        case " ":
-            this.game.changeState(new PauseState(this.game));
-            break;
+        switch (keyName) {
+            case "ArrowUp":
+            case "z":
+                this.game.snake.goUp();
+                break;
+            case "ArrowRight":
+            case "d":
+                this.game.snake.goRight();
+                break;
+            case "ArrowDown":
+            case "s":
+                this.game.snake.goDown();
+                break;
+            case "ArrowLeft":
+            case "q":
+                this.game.snake.goLeft();
+                break;
+            case " ":
+                this.game.changeState(new PauseState(this.game));
+                break;
         }
     }
 
@@ -95,10 +95,10 @@ class PauseState extends GameState {
     }
 
     handleKeyPress(keyName) {
-        switch(keyName) {
-        case " ":
-            this.game.changeState(new RunningState(this.game));
-            break;
+        switch (keyName) {
+            case " ":
+                this.game.changeState(new RunningState(this.game));
+                break;
         }
     }
 
@@ -119,8 +119,8 @@ class PauseState extends GameState {
         ctx.fillStyle = "black";
         ctx.font = "50px Arial";
         ctx.fillText("PAUSE",
-                     (WIDTH*SCALE)/2,
-                     (HEIGHT*SCALE)/2);
+            (WIDTH * SCALE) / 2,
+            (HEIGHT * SCALE) / 2);
         console.log("Drawn");
     }
 
@@ -147,65 +147,82 @@ class GameOverState extends GameState {
         ctx.textAlign = "center";
         ctx.fillStyle = "black";
         ctx.font = "50px Arial";
+
         ctx.fillText("GAME OVER",
-                     (WIDTH*SCALE)/2,
-                     ((HEIGHT*SCALE)/2)-25);
+            (WIDTH * SCALE) / 2,
+            ((HEIGHT * SCALE) / 2) - 25);
+
         ctx.fillText("SCORE = " + this.game.score,
-                     (WIDTH*SCALE)/2,
-                     ((WIDTH*SCALE)/2)+25);
+            (WIDTH * SCALE) / 2,
+            ((WIDTH * SCALE) / 2) + 25);
+
+        ctx.font = "25px Arial";
+        ctx.fillText("PRESS ENTER TO START AGAIN :)",
+            (WIDTH * SCALE) / 2,
+            ((HEIGHT * SCALE) / 2) + 60);
     }
 }
 
 class Game {
-    constructor(context, snake, width, height) {
-        this.elements = new Array();
-        this.context = context;
+    init(snake) {
         this.snake = snake;
         this.score = 0;
-        
+
         this.seed = new Seed(0, 0);
-        
+
         // Add the snake after the seed.
         this.addElement(this.seed);
         this.addElement(this.snake);
 
         this.ticker = null;
         this.drawer = null;
+    }
 
+    constructor(context, snake, width, height) {
+        this.elements = new Array();
+        this.context = context;
+
+        this.init(snake);
     }
 
     changeState(state) {
         this.state = state;
         this.state.resume();
     }
-    
+
     pickRandomSeedCoordinates() {
-        return [Math.floor(Math.random()*WIDTH),
-                Math.floor(Math.random()*HEIGHT)];
+        return [Math.floor(Math.random() * WIDTH),
+            Math.floor(Math.random() * HEIGHT)];
     }
-    
+
     resetSeed() {
         let coords;
         do {
             coords = this.pickRandomSeedCoordinates();
             console.log(coords);
-        } while(this.seedCollide(coords[0], coords[1]));
+        } while (this.seedCollide(coords[0], coords[1]));
         this.seed.x = coords[0];
         this.seed.y = coords[1];
-        console.log("New seed at ("+ this.seed.x + ", " + this.seed.y + ")");
+        console.log("New seed at (" + this.seed.x + ", " + this.seed.y + ")");
+    }
+
+    reset(new_snake){
+        this.removeElemets();
+        this.init(new_snake);
+        this.run();
     }
 
     seedCollide(x, y) {
         let i;
         let elts = this.snake.body
-        for(i = 0; i < elts.length; i++) {
+        for (i = 0; i < elts.length; i++) {
             if (elts[i].x == x && elts[i].y == y) {
                 return true;
             }
         }
         return false;
     }
-    
+
     handleKeyPress(keyName) {
         this.state.handleKeyPress(keyName);
     }
@@ -213,15 +230,22 @@ class Game {
     addElement(element) {
         this.elements.push(element);
     }
-    
+
+    removeElemets(){
+        this.elements = [];
+    }
 
     resumeTicker() {
-        this.ticker = setInterval(() => { this.tick(); }, 100);
+        this.ticker = setInterval(() => {
+            this.tick();
+        }, 100);
         this.tick();
     }
 
     resumeDrawer() {
-        this.drawer = setInterval(() => { this.draw(); }, 16);
+        this.drawer = setInterval(() => {
+            this.draw();
+        }, 16);
         this.draw();
     }
 
@@ -232,13 +256,13 @@ class Game {
     stopDrawer() {
         clearInterval(this.drawer);
     }
-    
+
     run() {
         // Set new seed coordinates.
         this.resetSeed();
         this.changeState(new RunningState(this));
     }
-    
+
     clearScreen() {
         this.context.beginPath();
         this.context.rect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
@@ -255,17 +279,16 @@ class Game {
         let i;
         let body = this.snake.body;
         console.log("Check colliding");
-        for(i = 0; i < body.length; i++) {
-            if(body[i].x == this.snake.x &&
-               body[i].y == this.snake.y)
-            {
+        for (i = 0; i < body.length; i++) {
+            if (body[i].x == this.snake.x &&
+                body[i].y == this.snake.y) {
                 return true;
             }
         }
         return false;
     }
-    
-    
+
+
     ticked() {
         if (this.snake.x == this.seed.x && this.snake.y == this.seed.y) {
             ++this.score;
@@ -276,7 +299,7 @@ class Game {
             this.changeState(new GameOverState(this));
         }
     }
-    
+
     tick() {
         this.state.tick();
     }
@@ -290,11 +313,11 @@ class Element {
     }
 
     tick() {
-        
+
     }
-    
+
     draw(context) {
-        
+
     }
 }
 
@@ -321,73 +344,73 @@ class Snake extends Element {
         this.body.push(new Element(9, 10));
         this.body.push(new Element(8, 10));
     }
-    
+
     moveUp() {
         --this.y;
-        if(this.y < 0) {
+        if (this.y < 0) {
             this.y = HEIGHT - 1;
         }
     }
-    
+
     moveRight() {
         ++this.x;
-        if(this.x == WIDTH) {
+        if (this.x == WIDTH) {
             this.x = 0;
         }
     }
-    
+
     moveDown() {
         ++this.y;
-        if(this.y == HEIGHT) {
+        if (this.y == HEIGHT) {
             this.y = 0;
         }
     }
-    
+
     moveLeft() {
         --this.x;
-        if(this.x < 0) {
+        if (this.x < 0) {
             this.x = HEIGHT - 1;
         }
     }
-    
+
     goUp() {
         this.direction = DIRECTION.UP;
     }
-    
+
     goRight() {
         this.direction = DIRECTION.RIGHT;
     }
-    
+
     goDown() {
         this.direction = DIRECTION.DOWN;
     }
-    
+
     goLeft() {
         this.direction = DIRECTION.LEFT;
     }
-    
+
     moveBody() {
         if (this.body.length > 0) {
             let i;
-            for(i = this.body.length-1; i > 0; --i) {
-                this.body[i].x = this.body[i-1].x;
-                this.body[i].y = this.body[i-1].y;
+            for (i = this.body.length - 1; i > 0; --i) {
+                this.body[i].x = this.body[i - 1].x;
+                this.body[i].y = this.body[i - 1].y;
             }
-            
+
             this.body[0].x = this.x;
             this.body[0].y = this.y;
         }
     }
-    
+
     eatSeed() {
         let newElement = new Element(this.x, this.y);
-        
+
         // Given the direction, shift the newElement's position.
         // E.g. if the snake goes up, it comes from the bottom. Then spawn
         // The new element towards the bottom.
-        
-        
-        switch(this.direction) {
+
+
+        switch (this.direction) {
             case DIRECTION.UP:
                 ++newElement.y;
                 break;
@@ -401,43 +424,43 @@ class Snake extends Element {
                 ++newElement.x;
                 break;
         }
-        
+
         this.body.push(newElement);
         console.log(this.body);
     }
-    
+
     tick() {
-        
+
         this.moveBody();
 
-        switch(this.direction) {
-        case DIRECTION.UP:
-            this.moveUp();
-            break;
-        case DIRECTION.RIGHT:
-            this.moveRight();
-            break;
-        case DIRECTION.DOWN:
-            this.moveDown();
-            break;
-        case DIRECTION.LEFT:
-            this.moveLeft();
-            break;
+        switch (this.direction) {
+            case DIRECTION.UP:
+                this.moveUp();
+                break;
+            case DIRECTION.RIGHT:
+                this.moveRight();
+                break;
+            case DIRECTION.DOWN:
+                this.moveDown();
+                break;
+            case DIRECTION.LEFT:
+                this.moveLeft();
+                break;
         }
     }
-    
+
     drawElement(context, element) {
         context.rect(element.x * SCALE, element.y * SCALE, SCALE, SCALE);
     }
-    
+
     draw(context) {
         // Draw the head
         context.beginPath();
         context.fillStyle = "red";
-        
+
         // Draw the head
         this.drawElement(context, this);
-        
+
         // Draw the body
         this.body.forEach((element) => {
             this.drawElement(context, element);
@@ -457,7 +480,17 @@ let game = new Game(context, snake);
 
 document.addEventListener('keydown', (event) => {
     const keyName = event.key;
-    game.handleKeyPress(keyName);
+
+    // Manage the reset of the Snake and the Game when GameOver
+    console.log(keyName);
+    if (keyName === 'Enter' && game.state instanceof GameOverState){
+        snake = new Snake();
+        game.reset(snake);
+    }
+    // Else we just hand over the key press to the game
+    else {
+        game.handleKeyPress(keyName);
+    }
 });
 
 game.run();
