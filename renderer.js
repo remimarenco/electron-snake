@@ -482,7 +482,6 @@ document.addEventListener('keydown', (event) => {
     const keyName = event.key;
 
     // Manage the reset of the Snake and the Game when GameOver
-    console.log(keyName);
     if (keyName === 'Enter' && game.state instanceof GameOverState){
         snake = new Snake();
         game.reset(snake);
